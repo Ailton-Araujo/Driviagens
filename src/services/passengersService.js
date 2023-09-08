@@ -1,10 +1,11 @@
 import { passengersRepository } from "../repositories/passengerRepository.js";
+import { errorTypes } from "../errors/index.js";
 
 function create(firstName, lastName) {
   return passengersRepository.insert(firstName, lastName);
 }
 
-function read(queryStrings) {
+async function read(queryStrings) {
   const { name, page } = queryStrings;
 
   let sqlQuery = ` `;
@@ -25,7 +26,15 @@ function read(queryStrings) {
     sqlQueryParams.push((page - 1) * 10);
     sqlQuery += `OFFSET $${sqlQueryParams.length} `;
   }
-  return passengersRepository.select(sqlQuery, sqlQueryParams);
+  const passengerTravels = await passengersRepository.select(
+    sqlQuery,
+    sqlQueryParams
+  );
+
+  if (passengerTravels.rows.length > 10)
+    throw errorTypes.internal("Too many results");
+
+  return passengerTravels.rows;
 }
 
 export const passengersService = { create, read };

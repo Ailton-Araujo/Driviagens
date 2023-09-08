@@ -11,6 +11,8 @@ export default function errorHandler(error, req, res, next) {
       return res.status(httpStatus.CONFLICT).send(error.detail);
     case "schema":
       return res.status(httpStatus.UNPROCESSABLE_ENTITY).send(error.detail);
+    case "internal":
+      return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(error.detail);
     default:
       return res
         .status(httpStatus.INTERNAL_SERVER_ERROR)

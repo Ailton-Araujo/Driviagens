@@ -9,7 +9,7 @@ function create(origin, destination, date) {
   return flightsRepository.insert(origin, destination, date);
 }
 
-function read(queryStrings) {
+async function read(queryStrings) {
   const {
     origin,
     destination,
@@ -69,7 +69,12 @@ function read(queryStrings) {
     sqlQueryParams.push((page - 1) * 10);
     sqlQuery += `OFFSET $${sqlQueryParams.length} `;
   }
-  return flightsRepository.select(sqlQuery, sqlQueryParams);
+
+  const flights = await flightsRepository.select(sqlQuery, sqlQueryParams);
+
+  if (flights.rows.length > 10) throw errorTypes.internal("Too many results");
+
+  return flights.rows;
 }
 
 export const flightsService = { create, read };

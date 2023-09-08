@@ -11,7 +11,7 @@ async function read(req, res) {
   const queryStrings = req.query;
   const passengersTravels = await passengersService.read(queryStrings);
 
-  res.status(httpStatus.OK).send(passengersTravels.rows);
+  res.status(httpStatus.OK).send(passengersTravels);
 }
 
 export const passengersController = { create, read };

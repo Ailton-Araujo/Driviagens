@@ -15,7 +15,7 @@ async function read(req, res) {
   const queryStrings = req.query;
   const flights = await flightsService.read(queryStrings);
 
-  res.status(httpStatus.OK).send(flights.rows);
+  res.status(httpStatus.OK).send(flights);
 }
 
 export const flightsController = { create, read };
