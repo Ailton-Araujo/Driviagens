@@ -1,8 +1,5 @@
-import joiBase from "joi";
-import joiDate from "@joi/date";
-const joi = joiBase.extend(joiDate);
-
 import { flightsRepository } from "../repositories/flightsRepository.js";
+import dateSchema from "../schemas/dateSchema.js";
 import { errorTypes } from "../errors/index.js";
 
 function create(origin, destination, date) {
@@ -18,59 +15,38 @@ async function read(queryStrings) {
     page,
   } = queryStrings;
 
-  let sqlQuery = ` `;
-  const sqlQueryParams = [];
-
-  if (origin) {
-    sqlQueryParams.push(origin);
-    sqlQuery += `WHERE LOWER("originTb".name) = LOWER($${sqlQueryParams.length}) `;
-  }
-
-  if (destination) {
-    sqlQueryParams.push(destination);
-    sqlQuery += sqlQuery.includes("WHERE") ? `AND ` : `WHERE `;
-    sqlQuery += `LOWER ("destinationTb".name) = LOWER($${sqlQueryParams.length}) `;
-  }
+  const smallDateFormat = smallDate?.split("-").reverse().join("-");
+  const biggerDateFormat = biggerDate?.split("-").reverse().join("-");
 
   if (smallDate || biggerDate) {
-    const dateValidation = joi
-      .object({
-        smallDate: joi.date().format("DD-MM-YYYY").required(),
-        biggerDate: joi.date().format("DD-MM-YYYY").required(),
-      })
-      .validate({ smallDate, biggerDate }, { abortEarly: false });
+    const dateValidation = dateSchema.validate(
+      { smallDate, biggerDate },
+      { abortEarly: false }
+    );
 
     if (dateValidation.error)
       throw errorTypes.schema(
         dateValidation.error.details.map((detail) => detail.message)
       );
 
-    const smallDateFormat = smallDate.split("-").reverse().join("-");
-    const biggerDateFormat = biggerDate.split("-").reverse().join("-");
-
     if (new Date(smallDateFormat) > new Date(biggerDateFormat))
       throw errorTypes.query(
         "The smaller-date cannot be after the bigger-date"
       );
-
-    sqlQueryParams.push(smallDateFormat);
-    sqlQueryParams.push(biggerDateFormat);
-    sqlQuery += sqlQuery.includes("WHERE") ? `AND ` : `WHERE `;
-    sqlQuery += `flights.date BETWEEN $${sqlQueryParams.length - 1} AND $${
-      sqlQueryParams.length
-    } `;
   }
-
-  sqlQuery += `ORDER BY flights.date, flights.id `;
 
   if (page) {
     if (isNaN(Number(page)) || Number(page) < 1)
       throw errorTypes.query("The page must be a number greater than 0");
-    sqlQueryParams.push((page - 1) * 10);
-    sqlQuery += `OFFSET $${sqlQueryParams.length} `;
   }
 
-  const flights = await flightsRepository.select(sqlQuery, sqlQueryParams);
+  const flights = await flightsRepository.select(
+    origin,
+    destination,
+    smallDateFormat,
+    biggerDateFormat,
+    page
+  );
 
   if (flights.rows.length > 10) throw errorTypes.internal("Too many results");
 
