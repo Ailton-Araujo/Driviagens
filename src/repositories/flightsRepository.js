@@ -29,8 +29,7 @@ function select(origin, destination, smallDateFormat, biggerDateFormat, page) {
   }
 
   if (smallDateFormat && biggerDateFormat) {
-    sqlQueryParams.push(smallDateFormat);
-    sqlQueryParams.push(biggerDateFormat);
+    sqlQueryParams.push(smallDateFormat, biggerDateFormat);
     sqlQuery += sqlQuery.includes("WHERE") ? `AND ` : `WHERE `;
     sqlQuery += `flights.date BETWEEN $${sqlQueryParams.length - 1} AND $${
       sqlQueryParams.length
