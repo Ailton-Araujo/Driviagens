@@ -40,10 +40,9 @@ function select(origin, destination, smallDateFormat, biggerDateFormat, page) {
 
   if (page) {
     sqlQueryParams.push((page - 1) * 10);
-    sqlQuery += `OFFSET $${sqlQueryParams.length} `;
+    sqlQuery += `OFFSET $${sqlQueryParams.length} 
+    LIMIT 10;`;
   }
-
-  sqlQuery += `LIMIT 10;`;
 
   return db.query(sqlQuery, sqlQueryParams);
 }

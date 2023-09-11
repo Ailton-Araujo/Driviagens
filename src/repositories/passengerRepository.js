@@ -12,7 +12,7 @@ function select(name, page) {
   let sqlQuery = `SELECT (passengers."firstName" || ' ' || passengers."lastName") AS passenger, 
   CAST(COUNT(travels."passengerId") AS INTEGER) AS travels
   FROM passengers
-  JOIN travels ON passengers.id = travels."passengerId" `;
+  LEFT JOIN travels ON passengers.id = travels."passengerId" `;
 
   if (name) {
     sqlQueryParams.push(`%${name}%`);
@@ -25,10 +25,9 @@ function select(name, page) {
 
   if (page) {
     sqlQueryParams.push((page - 1) * 10);
-    sqlQuery += `OFFSET $${sqlQueryParams.length} `;
+    sqlQuery += `OFFSET $${sqlQueryParams.length} 
+    LIMIT 10;`;
   }
-
-  sqlQuery += `LIMIT 10;`;
 
   return db.query(sqlQuery, sqlQueryParams);
 }

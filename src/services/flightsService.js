@@ -6,7 +6,7 @@ function create(origin, destination, date) {
   return flightsRepository.insert(origin, destination, date);
 }
 
-async function read(queryStrings) {
+function read(queryStrings) {
   const {
     origin,
     destination,
@@ -40,17 +40,13 @@ async function read(queryStrings) {
       throw errorTypes.query("The page must be a number greater than 0");
   }
 
-  const flights = await flightsRepository.select(
+  return flightsRepository.select(
     origin,
     destination,
     smallDateFormat,
     biggerDateFormat,
     page
   );
-
-  if (flights.rows.length > 10) throw errorTypes.internal("Too many results");
-
-  return flights.rows;
 }
 
 export const flightsService = { create, read };
