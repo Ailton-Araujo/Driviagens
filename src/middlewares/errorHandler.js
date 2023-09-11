@@ -5,9 +5,13 @@ export default function errorHandler(error, req, res, next) {
   switch (error.type || error.code) {
     case "query":
       return res.status(httpStatus.BAD_REQUEST).send(error.detail);
-    case ("notFound", "23503"):
+    case "notFound":
       return res.status(httpStatus.NOT_FOUND).send(error.detail);
-    case ("conflict", "23505"):
+    case "23503":
+      return res.status(httpStatus.NOT_FOUND).send(error.detail);
+    case "conflict":
+      return res.status(httpStatus.CONFLICT).send(error.detail);
+    case "23505":
       return res.status(httpStatus.CONFLICT).send(error.detail);
     case "schema":
       return res.status(httpStatus.UNPROCESSABLE_ENTITY).send(error.detail);
